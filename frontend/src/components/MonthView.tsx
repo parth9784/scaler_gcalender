@@ -58,7 +58,7 @@ const MonthView: React.FC<MonthViewProps> = ({
       </div>
 
       {/* Calendar Grid */}
-      <div className="flex-1 grid grid-cols-7 auto-rows-fr overflow-auto">
+      <div className="flex-1 grid grid-cols-7 grid-rows-5 lg:grid-rows-6 overflow-auto">
         {days.map((day, index) => {
           const dayEvents = getEventsForDay(day);
           const isCurrentMonth = isSameMonth(day, currentDate);
@@ -68,14 +68,14 @@ const MonthView: React.FC<MonthViewProps> = ({
             <div
               key={index}
               onClick={() => onDateClick(day)}
-              className={`calendar-day relative border-r border-b border-gray-200 p-2.5 min-h-[110px] cursor-pointer transition-all ${
+              className={`calendar-day relative border-r border-b border-gray-200 p-2 min-h-[140px] cursor-pointer transition-all ${
                 !isCurrentMonth ? 'bg-gray-50/50' : 'bg-white'
               }`}
             >
               {/* Date Number */}
-              <div className="flex items-center justify-center mb-2">
+              <div className="flex items-center justify-center mb-1.5">
                 <span
-                  className={`flex items-center justify-center w-8 h-8 text-sm rounded-full transition-all ${
+                  className={`flex items-center justify-center w-7 h-7 text-sm rounded-full transition-all ${
                     isCurrentToday
                       ? 'bg-blue-600 text-white font-bold shadow-md'
                       : isCurrentMonth
@@ -88,7 +88,7 @@ const MonthView: React.FC<MonthViewProps> = ({
               </div>
 
               {/* Events */}
-              <div className="space-y-1 overflow-hidden">
+              <div className="space-y-0.5 overflow-y-auto max-h-[calc(100%-2.5rem)]">
                 {dayEvents.slice(0, 3).map((event) => {
                   const eventStart = parseISO(event.start_time);
                   const timeText = event.all_day
@@ -102,14 +102,14 @@ const MonthView: React.FC<MonthViewProps> = ({
                         e.stopPropagation();
                         onEventClick(event);
                       }}
-                      className="event-card group px-2 py-1.5 rounded-md text-xs truncate cursor-pointer event-transparent"
+                      className="event-card group px-2 py-1 rounded text-xs truncate cursor-pointer event-transparent"
                       style={{
                         backgroundColor: event.color,
                         color: 'white',
                       }}
                     >
-                      <div className="font-semibold truncate">
-                        {timeText && <span className="opacity-90">{timeText}</span>}
+                      <div className="font-medium truncate">
+                        {timeText && <span className="opacity-90 text-[10px]">{timeText}</span>}
                         {timeText && ' '}
                         {event.title}
                       </div>
@@ -117,7 +117,7 @@ const MonthView: React.FC<MonthViewProps> = ({
                   );
                 })}
                 {dayEvents.length > 3 && (
-                  <button className="text-xs text-blue-600 hover:text-blue-700 font-medium pl-2 pt-1 hover:underline">
+                  <button className="text-[11px] text-blue-600 hover:text-blue-700 font-medium pl-1.5 pt-0.5 hover:underline">
                     +{dayEvents.length - 3} more
                   </button>
                 )}

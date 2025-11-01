@@ -41,7 +41,7 @@ const Header: React.FC<HeaderProps> = ({
         {/* Menu Button (Mobile) */}
         <button
           onClick={toggleSidebar}
-          className="lg:hidden p-2 rounded-full hover:bg-gray-100 transition-colors"
+          className="lg:hidden p-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
           aria-label="Toggle menu"
         >
           <Menu className="w-6 h-6 text-gray-600" />
@@ -60,7 +60,7 @@ const Header: React.FC<HeaderProps> = ({
           {/* Today */}
           <button
             onClick={() => onNavigate('today')}
-            className="px-4 py-1.5 text-sm font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-100 active:bg-gray-200 transition-colors"
+            className="px-4 py-1.5 text-sm font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-100 active:bg-gray-200 transition-colors cursor-pointer"
           >
             Today
           </button>
@@ -68,14 +68,14 @@ const Header: React.FC<HeaderProps> = ({
           {/* Prev / Next */}
           <button
             onClick={() => onNavigate('prev')}
-            className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
             aria-label="Previous"
           >
             <ChevronLeft className="w-5 h-5 text-gray-600" />
           </button>
           <button
             onClick={() => onNavigate('next')}
-            className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
             aria-label="Next"
           >
             <ChevronRight className="w-5 h-5 text-gray-600" />
@@ -98,7 +98,7 @@ const Header: React.FC<HeaderProps> = ({
               <button
                 key={type}
                 onClick={() => onViewChange(type)}
-                className={`px-4 py-2 text-sm font-medium capitalize transition-colors duration-200
+                className={`px-4 py-2 text-sm font-medium capitalize transition-colors duration-200 cursor-pointer
                   ${isActive 
                     ? 'bg-blue-600 text-white' 
                     : 'text-gray-700 hover:bg-gray-100'}
@@ -115,7 +115,7 @@ const Header: React.FC<HeaderProps> = ({
         {/* Create Event Button */}
         <button
           onClick={onCreateEvent}
-          className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-md hover:shadow-lg transition-all duration-200"
+          className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
         >
           <Plus className="w-5 h-5" />
           <span className="font-medium hidden sm:inline">Create</span>

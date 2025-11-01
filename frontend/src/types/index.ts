@@ -37,8 +37,5 @@ export const GOOGLE_CALENDAR_COLORS = [
   { name: 'Basil', value: '#0B8043' },
   { name: 'Peacock', value: '#039BE5' },
   { name: 'Blueberry', value: '#3F51B5' },
-  { name: 'Lavender', value: '#7986CB' },
-  { name: 'Grape', value: '#8E24AA' },
-  { name: 'Graphite', value: '#616161' },
-  { name: 'Default', value: '#4285F4' },
+ 
 ];

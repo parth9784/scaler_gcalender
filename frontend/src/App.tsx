@@ -8,6 +8,7 @@ import DayView from './components/DayView';
 import EventModal from './components/EventModal';
 import { eventsAPI } from './api/events';
 import type { Event, ViewType, CreateEventData, UpdateEventData } from './types';
+import { Loader } from 'lucide-react';
 import {
   addMonths,
   addWeeks,
@@ -168,7 +169,7 @@ function App() {
   ;
 
   return (
-    <div className="h-screen flex flex-col bg-white">
+    <div className="h-screen flex flex-col bg-white ::-webkit-scrollbar">
       <Header
         currentDate={currentDate}
         view={view}
@@ -197,12 +198,12 @@ function App() {
           )}
 
           {loading ? (
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-center">
-                <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-300 border-t-blue-600"></div>
-                <p className="mt-4 text-gray-600">Loading events...</p>
-              </div>
-            </div>
+            <div className="flex flex-1 items-center justify-center">
+  <div className="flex flex-col items-center justify-center text-center space-y-3">
+    <Loader className="h-8 w-8 animate-spin text-blue-600" />
+  </div>
+</div>
+
           ) : (
             <>
               {view === 'month' && (
@@ -242,6 +243,7 @@ function App() {
         event={selectedEvent}
         initialDate={selectedDate}
       />
+
     </div>
   );
 }
