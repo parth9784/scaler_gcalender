@@ -1,3 +1,6 @@
+// Event types
+export type EventType = 'event' | 'task' | 'reminder';
+
 export interface Event {
   id: number;
   title: string;
@@ -5,6 +8,7 @@ export interface Event {
   start_time: string;
   end_time: string;
   all_day: boolean;
+  event_type: EventType;
   color: string;
 }
 
@@ -14,6 +18,7 @@ export interface CreateEventData {
   start_time: string;
   end_time: string;
   all_day?: boolean;
+  event_type?: EventType;
   color?: string;
 }
 
@@ -23,7 +28,39 @@ export interface UpdateEventData {
   start_time?: string;
   end_time?: string;
   all_day?: boolean;
+  event_type?: EventType;
   color?: string;
+}
+
+// Auth types
+export interface User {
+  id: number;
+  username: string;
+  email: string;
+}
+
+export interface Token {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+}
+
+export interface AuthResponse {
+  user: User;
+  token: Token;
+}
+
+export interface SignupData {
+  username: string;
+  email: string;
+  password: string;
+  first_name?: string;
+  last_name?: string;
+}
+
+export interface LoginData {
+  username: string;
+  password: string;
 }
 
 export type ViewType = 'month' | 'week' | 'day';
@@ -37,5 +74,4 @@ export const GOOGLE_CALENDAR_COLORS = [
   { name: 'Basil', value: '#0B8043' },
   { name: 'Peacock', value: '#039BE5' },
   { name: 'Blueberry', value: '#3F51B5' },
- 
 ];

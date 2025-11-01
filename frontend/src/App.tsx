@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import './App.css';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
@@ -6,8 +6,11 @@ import MonthView from './components/MonthView';
 import WeekView from './components/WeekView';
 import DayView from './components/DayView';
 import EventModal from './components/EventModal';
-import { eventsAPI } from './api/events';
-import type { Event, ViewType, CreateEventData, UpdateEventData } from './types';
+import Login from './components/Login';
+import Signup from './components/Signup';
+import { useAuthStore } from './store/authStore';
+import { useEvents } from './hooks/useEvents';
+import type { ViewType, CreateEventData, UpdateEventData, Event as CalendarEvent } from './types';
 import { Loader } from 'lucide-react';
 import {
   addMonths,
@@ -21,49 +24,35 @@ import {
 } from './utils/dateUtils';
 
 function App() {
-  const [currentDate,
-  setCurrentDate]=useState(new Date());
-  const [view,
-  setView]=useState<ViewType>('month');
-  const [events,
-  setEvents]=useState<Event[]>([]);
-  const [isModalOpen,
-  setIsModalOpen]=useState(false);
-  const [selectedEvent,
-  setSelectedEvent]=useState<Event | null>(null);
-  const [selectedDate,
-  setSelectedDate]=useState<Date | undefined>(undefined);
-  const [loading,
-  setLoading]=useState(false);
-  const [error,
-  setError]=useState<string | null>(null);
+  const { isAuthenticated } = useAuthStore();
+  const [showLogin, setShowLogin] = useState(true);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [view, setView] = useState<ViewType>('month');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
-  // Fetch events on mount
-  useEffect(()=> {
-      fetchEvents();
-    }
+  // Use the events hook for authenticated users
+  const { events, loading, error, createEvent, updateEvent, deleteEvent } = useEvents();
 
-    , []);
-
-  const fetchEvents=async ()=> {
-    try {
-      setLoading(true);
-      setError(null);
-      const data=await eventsAPI.getAll();
-      setEvents(data);
-    }
-
-    catch (err) {
-      console.error('Error fetching events:', err);
-      setError('Failed to load events. Please make sure the backend is running.');
-    }
-
-    finally {
-      setLoading(false);
-    }
+  // Show login/signup if not authenticated
+  if (!isAuthenticated) {
+    return showLogin ? (
+      <Login
+        onSuccess={() => {
+          // Successfully logged in, App will re-render
+        }}
+        onSwitchToSignup={() => setShowLogin(false)}
+      />
+    ) : (
+      <Signup
+        onSuccess={() => {
+          // Successfully signed up, App will re-render
+        }}
+        onSwitchToLogin={() => setShowLogin(true)}
+      />
+    );
   }
-
-  ;
 
   const handleNavigate=(direction: 'prev'| 'next'| 'today')=> {
     if (direction==='today') {
@@ -96,77 +85,55 @@ function App() {
 
   ;
 
-  const handleEditEvent=(event: Event)=> {
+  const handleEditEvent = (event: CalendarEvent) => {
     setSelectedEvent(event);
     setSelectedDate(undefined);
     setIsModalOpen(true);
-  }
+  };
 
-  ;
-
-  const handleSaveEvent=async (data: CreateEventData | UpdateEventData)=> {
+  const handleSaveEvent = async (data: CreateEventData | UpdateEventData) => {
     try {
       if (selectedEvent) {
         // Update existing event
-        const updated=await eventsAPI.update(selectedEvent.id, data as UpdateEventData);
-        setEvents(events.map((e)=> (e.id===updated.id ? updated : e)));
-      }
-
-      else {
+        await updateEvent(selectedEvent.id, data as UpdateEventData);
+      } else {
         // Create new event
-        const created=await eventsAPI.create(data as CreateEventData);
-        setEvents([...events, created]);
+        await createEvent(data as CreateEventData);
       }
-
       setIsModalOpen(false);
-    }
-
-    catch (err) {
+    } catch (err) {
       console.error('Error saving event:', err);
       alert('Failed to save event. Please try again.');
     }
-  }
+  };
 
-  ;
+  const handleDeleteEvent = async () => {
+    if (!selectedEvent) return;
 
-  const handleDeleteEvent=async ()=> {
-    if ( !selectedEvent) return;
-
-    if ( !confirm('Are you sure you want to delete this event?')) return;
+    if (!confirm('Are you sure you want to delete this event?')) return;
 
     try {
-      await eventsAPI.delete(selectedEvent.id);
-      setEvents(events.filter((e)=> e.id !==selectedEvent.id));
+      await deleteEvent(selectedEvent.id);
       setIsModalOpen(false);
-    }
-
-    catch (err) {
+    } catch (err) {
       console.error('Error deleting event:', err);
       alert('Failed to delete event. Please try again.');
     }
-  }
+  };
 
-  ;
-
-  const handleDateClick=(date: Date)=> {
+  const handleDateClick = (date: Date) => {
     handleCreateEvent(date);
-  }
+  };
 
-  ;
-
-  const handleTimeSlotClick=(date: Date, hour: number)=> {
-    const dateWithTime=setMinutes(setHours(date, hour), 0);
+  const handleTimeSlotClick = (date: Date, hour: number) => {
+    const dateWithTime = setMinutes(setHours(date, hour), 0);
     handleCreateEvent(dateWithTime);
-  }
+  };
 
-  ;
-
-  const handleDayTimeSlotClick=(hour: number)=> {
-    const dateWithTime=setMinutes(setHours(currentDate, hour), 0);
+  const handleDayTimeSlotClick = (hour: number) => {
+    const dateWithTime = setMinutes(setHours(currentDate, hour), 0);
     handleCreateEvent(dateWithTime);
-  }
-
-  ;
+  };
 
   return (
     <div className="h-screen flex flex-col bg-white ::-webkit-scrollbar">
