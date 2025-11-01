@@ -1,43 +1,36 @@
 from ninja import NinjaAPI
 from django.shortcuts import get_object_or_404
-from django.contrib.auth.models import User
-from typing import Optional
 from .schema import EventSchema, CreateEventSchema, UpdateEventSchema
 from .models import Event
+from .auth_middleware import JWTAuth
+from .auth_api import auth_router
 
 api = NinjaAPI()
 
+# Add authentication router (no auth required)
+api.add_router("/auth", auth_router)
 
-@api.get("/events", response=list[EventSchema])
-def list_events(request, user_id: Optional[int] = None):
-    """Get all events, optionally filtered by user_id"""
-    queryset = Event.objects.all()
-    if user_id is not None:
-        queryset = queryset.filter(user_id=user_id)
+
+@api.get("/events", response=list[EventSchema], auth=JWTAuth())
+def list_events(request):
+    """Get all events for the authenticated user"""
+    # request.user is set by JWTAuth middleware
+    queryset = Event.objects.filter(user=request.user)
     return queryset.order_by("start_time")
 
 
-@api.get("/events/{event_id}", response=EventSchema)
+@api.get("/events/{event_id}", response=EventSchema, auth=JWTAuth())
 def get_event(request, event_id: int):
-    """Get a specific event by ID"""
-    event = get_object_or_404(Event, id=event_id)
+    """Get a specific event by ID (only user's own events)"""
+    event = get_object_or_404(Event, id=event_id, user=request.user)
     return event
 
 
-@api.post("/events", response=EventSchema)
+@api.post("/events", response=EventSchema, auth=JWTAuth())
 def create_event(request, data: CreateEventSchema):
-    """Create a new event"""
-    # Get or create a default user if not authenticated
-    user = request.user if request.user.is_authenticated else User.objects.first()
-
-    if not user:
-        # Create a default user if none exists
-        user = User.objects.create_user(
-            username="default_user", password="default_pass"
-        )
-
+    """Create a new event for the authenticated user"""
     event = Event.objects.create(
-        user=user,
+        user=request.user,
         title=data.title,
         description=data.description or "",
         start_time=data.start_time,
@@ -48,10 +41,10 @@ def create_event(request, data: CreateEventSchema):
     return event
 
 
-@api.put("/events/{event_id}", response=EventSchema)
+@api.put("/events/{event_id}", response=EventSchema, auth=JWTAuth())
 def update_event(request, event_id: int, data: UpdateEventSchema):
-    """Update an existing event (partial update supported)"""
-    event = get_object_or_404(Event, id=event_id)
+    """Update an existing event (only user's own events)"""
+    event = get_object_or_404(Event, id=event_id, user=request.user)
 
     # Only update fields that are provided
     update_data = data.dict(exclude_unset=True)
@@ -62,9 +55,9 @@ def update_event(request, event_id: int, data: UpdateEventSchema):
     return event
 
 
-@api.delete("/events/{event_id}")
+@api.delete("/events/{event_id}", auth=JWTAuth())
 def delete_event(request, event_id: int):
-    """Delete an event"""
-    event = get_object_or_404(Event, id=event_id)
+    """Delete an event (only user's own events)"""
+    event = get_object_or_404(Event, id=event_id, user=request.user)
     event.delete()
     return {"success": True, "message": f"Event '{event.title}' deleted successfully"}
