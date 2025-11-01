@@ -1,11 +1,25 @@
 from ninja import NinjaAPI
+from ninja.errors import ValidationError
 from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
 from .schema import EventSchema, CreateEventSchema, UpdateEventSchema
 from .models import Event
 from .auth_middleware import JWTAuth
 from .auth_api import auth_router
 
 api = NinjaAPI()
+
+
+# Custom validation error handler
+@api.exception_handler(ValidationError)
+def validation_errors(request, exc):
+    """
+    Handle Pydantic validation errors and return proper JSON response
+    """
+    return JsonResponse(
+        {"detail": "Validation error", "errors": exc.errors}, status=422
+    )
+
 
 # Add authentication router (no auth required)
 api.add_router("/auth", auth_router)

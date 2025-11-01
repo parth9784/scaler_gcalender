@@ -1,4 +1,5 @@
 from ninja import Router
+from ninja.errors import HttpError
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.db import IntegrityError
@@ -13,12 +14,26 @@ from .jwt_utils import create_access_token
 auth_router = Router()
 
 
-@auth_router.post("/signup", response={201: AuthResponseSchema, 400: MessageSchema})
+@auth_router.post(
+    "/signup", response={201: AuthResponseSchema, 400: MessageSchema, 422: dict}
+)
 def signup(request, data: SignupSchema):
     """
     Register a new user
     """
     try:
+        # Validate required fields
+        if not data.username or not data.email or not data.password:
+            return 400, {"message": "Username, email, and password are required"}
+
+        # Validate email format (basic check)
+        if "@" not in data.email:
+            return 400, {"message": "Invalid email format"}
+
+        # Validate password length
+        if len(data.password) < 6:
+            return 400, {"message": "Password must be at least 6 characters long"}
+
         # Check if username already exists
         if User.objects.filter(username=data.username).exists():
             return 400, {"message": "Username already exists"}
@@ -45,6 +60,8 @@ def signup(request, data: SignupSchema):
                 "id": user.id,
                 "username": user.username,
                 "email": user.email,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
             },
             "token": token_data,
         }
@@ -55,31 +72,40 @@ def signup(request, data: SignupSchema):
         return 400, {"message": f"Error creating user: {str(e)}"}
 
 
-@auth_router.post("/login", response={200: AuthResponseSchema, 401: MessageSchema})
+@auth_router.post(
+    "/login", response={200: AuthResponseSchema, 401: MessageSchema, 422: dict}
+)
 def login(request, data: LoginSchema):
     """
     Login user and return JWT token
     """
-    # Authenticate user
-    user = authenticate(username=data.username, password=data.password)
+    try:
+        # Validate required fields
+        if not data.username or not data.password:
+            return 401, {"message": "Username and password are required"}
 
-    if not user:
-        return 401, {"message": "Invalid username or password"}
+        # Authenticate user
+        user = authenticate(username=data.username, password=data.password)
 
-    # Generate JWT token
-    token_data = create_access_token(user.id)
+        if not user:
+            return 401, {"message": "Invalid username or password"}
 
-    # Return user and token
-    return 200, {
-        "user": {
-            "id": user.id,
-            "username": user.username,
-            "email": user.email,
-            "first_name": user.first_name,
-            "last_name": user.last_name,
-        },
-        "token": token_data,
-    }
+        # Generate JWT token
+        token_data = create_access_token(user.id)
+
+        # Return user and token
+        return 200, {
+            "user": {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+            },
+            "token": token_data,
+        }
+    except Exception as e:
+        return 401, {"message": f"Authentication failed: {str(e)}"}
 
 
 @auth_router.post("/logout", response=MessageSchema)
