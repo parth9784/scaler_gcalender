@@ -87,8 +87,8 @@ const MonthView: React.FC<MonthViewProps> = ({
                 </span>
               </div>
 
-              {/* Events */}
-              <div className="space-y-0.5 overflow-y-auto max-h-[calc(100%-2.5rem)]">
+              {/* Events - Hidden on mobile, visible on desktop */}
+              <div className="space-y-0.5 overflow-y-auto max-h-[calc(100%-2.5rem)] hidden md:block">
                 {dayEvents.slice(0, 3).map((event) => {
                   const eventStart = parseISO(event.start_time);
                   const timeText = event.all_day
@@ -122,6 +122,18 @@ const MonthView: React.FC<MonthViewProps> = ({
                   </button>
                 )}
               </div>
+
+              {/* Event count indicator for mobile */}
+              {dayEvents.length > 0 && (
+                <div className="md:hidden flex justify-center items-center mt-1">
+                  <div className="w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
+                  {dayEvents.length > 1 && (
+                    <span className="ml-1 text-[10px] text-gray-600 font-medium">
+                      {dayEvents.length}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           );
         })}
