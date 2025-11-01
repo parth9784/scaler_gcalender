@@ -8,6 +8,7 @@ import type {
   AuthResponse 
 } from '../types';
 import { useAuthStore } from '../store/authStore';
+import { useEventStore } from '../store/eventStore';
 
 const API_BASE_URL = 'http://localhost:8000/api';
 
@@ -36,8 +37,9 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid, logout user
+      // Token expired or invalid, logout user and clear events
       useAuthStore.getState().logout();
+      useEventStore.getState().clearEvents();
     }
     return Promise.reject(error);
   }
@@ -57,6 +59,8 @@ export const authAPI = {
 
   logout: async (): Promise<void> => {
     await api.post('/auth/logout');
+    // Clear events from store when logging out
+    useEventStore.getState().clearEvents();
   },
 };
 

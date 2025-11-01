@@ -8,7 +8,6 @@ import {
   parseISO,
   startOfDay,
   endOfDay,
-  isWithinInterval,
 } from '../utils/dateUtils';
 
 interface MonthViewProps {
@@ -35,10 +34,11 @@ const MonthView: React.FC<MonthViewProps> = ({
       const eventStart = parseISO(event.start_time);
       const eventEnd = parseISO(event.end_time);
 
+      // Check if event starts or ends on this day, or spans across this day
       return (
-        isWithinInterval(eventStart, { start: dayStart, end: dayEnd }) ||
-        isWithinInterval(dayEnd, { start: dayStart, end: dayEnd }) ||
-        (eventStart <= dayStart && eventEnd >= dayEnd)
+        (eventStart >= dayStart && eventStart <= dayEnd) || // Event starts on this day
+        (eventEnd >= dayStart && eventEnd <= dayEnd) || // Event ends on this day
+        (eventStart < dayStart && eventEnd > dayEnd) // Event spans entire day
       );
     });
   };

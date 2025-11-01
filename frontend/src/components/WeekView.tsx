@@ -6,7 +6,6 @@ import {
   parseISO,
   startOfDay,
   endOfDay,
-  isWithinInterval,
   isSameDay,
 } from '../utils/dateUtils';
 
@@ -53,10 +52,11 @@ const WeekView: React.FC<WeekViewProps> = ({
       const eventStart = parseISO(event.start_time);
       const eventEnd = parseISO(event.end_time);
 
+      // Check if event starts or ends on this day, or spans across this day
       return (
-        isWithinInterval(eventStart, { start: dayStart, end: dayEnd }) ||
-        isWithinInterval(dayEnd, { start: dayStart, end: dayEnd }) ||
-        (eventStart <= dayStart && eventEnd >= dayEnd)
+        (eventStart >= dayStart && eventStart <= dayEnd) || // Event starts on this day
+        (eventEnd >= dayStart && eventEnd <= dayEnd) || // Event ends on this day
+        (eventStart < dayStart && eventEnd > dayEnd) // Event spans entire day
       );
     });
   };
@@ -138,13 +138,17 @@ const WeekView: React.FC<WeekViewProps> = ({
           {/* Events Overlay */}
           {weekDays.map((day, dayIndex) => {
             const dayEvents = getEventsForDay(day);
+            const dayWidth = 100 / 7;
+            const leftOffset = 80 + (dayIndex * dayWidth);
+            
             return (
               <div
                 key={dayIndex}
                 className="absolute top-0 pointer-events-none"
                 style={{
-                  left: `${80 + (dayIndex * (100 / 7))}px`,
-                  width: `calc(${100 / 7}% - ${dayIndex === 0 ? 80 : 0}px)`,
+                  left: `calc(${leftOffset}%)`,
+                  width: `calc(${dayWidth}%)`,
+                  height: '100%',
                 }}
               >
                 {dayEvents.map((event) => {
@@ -184,14 +188,17 @@ const WeekView: React.FC<WeekViewProps> = ({
           {weekDays.map((day, dayIndex) => {
             if (!isCurrentTimeLine(day)) return null;
             const position = getCurrentTimePosition();
+            const dayWidth = 100 / 7;
+            const leftOffset = 80 + (dayIndex * dayWidth);
+            
             return (
               <div
                 key={`time-${dayIndex}`}
                 className="absolute z-20 pointer-events-none"
                 style={{
                   top: `${position}px`,
-                  left: `${80 + (dayIndex * (100 / 7))}px`,
-                  width: `calc(${100 / 7}% - ${dayIndex === 0 ? 80 : 0}px)`,
+                  left: `calc(${leftOffset}%)`,
+                  width: `calc(${dayWidth}%)`,
                 }}
               >
                 <div className="relative">

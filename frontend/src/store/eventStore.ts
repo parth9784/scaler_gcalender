@@ -9,6 +9,7 @@ interface EventState {
   addEvent: (event: Event) => void;
   updateEvent: (id: number, event: Event) => void;
   deleteEvent: (id: number) => void;
+  clearEvents: () => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
 }
@@ -31,6 +32,8 @@ export const useEventStore = create<EventState>((set) => ({
   deleteEvent: (id) => set((state) => ({
     events: state.events.filter((e) => e.id !== id)
   })),
+  
+  clearEvents: () => set({ events: [], error: null }),
   
   setLoading: (loading) => set({ loading }),
   

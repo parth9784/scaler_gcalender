@@ -1,8 +1,10 @@
-import React from 'react';
-import { ChevronLeft, ChevronRight, Plus, CalendarFold, Menu } from 'lucide-react';
+import React, { useState } from 'react';
+import { ChevronLeft, ChevronRight, Plus, CalendarFold, Menu, LogOut, User } from 'lucide-react';
 import type { ViewType } from '../types';
 import { formatMonthYear, formatWeekRange, formatDayHeader } from '../utils/dateUtils';
 import { useAppStore } from '../store/appstate';
+import { useAuthStore } from '../store/authStore';
+import { useAuth } from '../hooks/useAuth';
 
 interface HeaderProps {
   currentDate: Date;
@@ -20,6 +22,21 @@ const Header: React.FC<HeaderProps> = ({
   onCreateEvent,
 }) => {
   const { toggleSidebar } = useAppStore();
+  const { user } = useAuthStore();
+  const { logout } = useAuth();
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+
+  const getInitials = () => {
+    if (!user) return 'U';
+    const firstInitial = user.first_name?.[0] || user.username?.[0] || '';
+    const lastInitial = user.last_name?.[0] || '';
+    return (firstInitial + lastInitial).toUpperCase() || user.username?.[0]?.toUpperCase() || 'U';
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    setShowProfileMenu(false);
+  };
 
   const getDateRangeText = () => {
     switch (view) {
@@ -120,6 +137,59 @@ const Header: React.FC<HeaderProps> = ({
           <Plus className="w-5 h-5" />
           <span className="font-medium hidden sm:inline">Create</span>
         </button>
+
+        {/* Profile Menu */}
+        <div className="relative">
+          <button
+            onClick={() => setShowProfileMenu(!showProfileMenu)}
+            className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors cursor-pointer"
+            aria-label="Profile menu"
+          >
+            {getInitials()}
+          </button>
+
+          {/* Dropdown Menu */}
+          {showProfileMenu && (
+            <>
+              {/* Backdrop */}
+              <div
+                className="fixed inset-0 z-10"
+                onClick={() => setShowProfileMenu(false)}
+              />
+              
+              {/* Menu */}
+              <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-20">
+                {/* User Info */}
+                <div className="px-4 py-3 border-b border-gray-200">
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 text-blue-600 font-semibold text-lg">
+                      {getInitials()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-gray-900 truncate">
+                        {user?.first_name && user?.last_name
+                          ? `${user.first_name} ${user.last_name}`
+                          : user?.username}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Menu Items */}
+                <div className="py-1">
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>Logout</span>
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </header>
   );
