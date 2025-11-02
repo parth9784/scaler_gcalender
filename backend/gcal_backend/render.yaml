@@ -1,0 +1,12 @@
+services:
+- type: web
+  name: gcal-backend
+  env: python
+  plan: free
+  buildCommand: "pip install -r requirements.txt"
+  startCommand: "gunicorn gcal_backend.wsgi:application"
+  envVars:
+  - key: DJANGO_SETTINGS_MODULE
+    value: gcal_backend.settings
+  - key: PYTHON_VERSION
+    value: 3.10.0

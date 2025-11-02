@@ -50,6 +50,7 @@ def create_event(request, data: CreateEventSchema):
         start_time=data.start_time,
         end_time=data.end_time,
         all_day=data.all_day,
+        event_type=data.event_type,
         color=data.color,
     )
     return event
