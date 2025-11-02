@@ -10,7 +10,8 @@ import type {
 import { useAuthStore } from '../store/authStore';
 import { useEventStore } from '../store/eventStore';
 
-const API_BASE_URL = 'http://localhost:8000/api';
+// const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = 'https://scaler-gcalender.onrender.com/api';
 
 // Create axios instance
 const api = axios.create({
