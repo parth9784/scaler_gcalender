@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { Loader, CalendarFold, Mail, Lock, User } from 'lucide-react';
 
+
 interface SignupProps {
   onSuccess?: () => void;
   onSwitchToLogin?: () => void;

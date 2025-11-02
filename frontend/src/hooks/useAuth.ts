@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { authAPI } from '../services/api';
 import type { SignupData, LoginData } from '../types';
+import toast from 'react-hot-toast';
 
 export const useAuth = () => {
   const { user, isAuthenticated, setAuth, logout: logoutStore } = useAuthStore();
@@ -14,10 +15,12 @@ export const useAuth = () => {
     try {
       const response = await authAPI.signup(data);
       setAuth(response.user, response.token.access_token);
+      toast.success(`Welcome, ${response.user.first_name || response.user.username}!`);
       return response.user;
     } catch (err: any) {
       const errorMsg = err.response?.data?.message || 'Signup failed';
       setError(errorMsg);
+      toast.error(errorMsg);
       throw new Error(errorMsg);
     } finally {
       setLoading(false);
@@ -30,10 +33,12 @@ export const useAuth = () => {
     try {
       const response = await authAPI.login(data);
       setAuth(response.user, response.token.access_token);
+      toast.success(`Welcome back, ${response.user.first_name || response.user.username}!`);
       return response.user;
     } catch (err: any) {
       const errorMsg = err.response?.data?.message || 'Login failed';
       setError(errorMsg);
+      toast.error(errorMsg);
       throw new Error(errorMsg);
     } finally {
       setLoading(false);
@@ -43,6 +48,7 @@ export const useAuth = () => {
   const logout = async () => {
     try {
       await authAPI.logout();
+      toast.success('Logged out successfully');
     } catch (err) {
       console.error('Logout error:', err);
     } finally {

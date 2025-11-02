@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import './App.css';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
@@ -9,6 +9,7 @@ import EventModal from './components/EventModal';
 import Login from './components/Login';
 import Signup from './components/Signup';
 import { useAuthStore } from './store/authStore';
+import { useAppStore } from './store/appstate';
 import { useEvents } from './hooks/useEvents';
 import type { ViewType, CreateEventData, UpdateEventData, Event as CalendarEvent } from './types';
 import { Loader } from 'lucide-react';
@@ -22,9 +23,11 @@ import {
   setHours,
   setMinutes,
 } from './utils/dateUtils';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   const { isAuthenticated } = useAuthStore();
+  const { eventTypeFilters } = useAppStore();
   const [showLogin, setShowLogin] = useState(true);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<ViewType>('month');
@@ -34,6 +37,12 @@ function App() {
 
   // Use the events hook for authenticated users
   const { events, loading, error, createEvent, updateEvent, deleteEvent } = useEvents();
+  console.log('Events:', events);
+
+  // Filter events based on selected event types
+  const filteredEvents = useMemo(() => {
+    return events.filter(event => eventTypeFilters[event.event_type]);
+  }, [events, eventTypeFilters]);
 
   // Show login/signup if not authenticated
   if (!isAuthenticated) {
@@ -103,7 +112,7 @@ function App() {
       setIsModalOpen(false);
     } catch (err) {
       console.error('Error saving event:', err);
-      alert('Failed to save event. Please try again.');
+      // Error is already shown via toast in useEvents hook
     }
   };
 
@@ -117,7 +126,7 @@ function App() {
       setIsModalOpen(false);
     } catch (err) {
       console.error('Error deleting event:', err);
-      alert('Failed to delete event. Please try again.');
+      // Error is already shown via toast in useEvents hook
     }
   };
 
@@ -176,7 +185,7 @@ function App() {
               {view === 'month' && (
                 <MonthView
                   currentDate={currentDate}
-                  events={events}
+                  events={filteredEvents}
                   onDateClick={handleDateClick}
                   onEventClick={handleEditEvent}
                 />
@@ -184,7 +193,7 @@ function App() {
               {view === 'week' && (
                 <WeekView
                   currentDate={currentDate}
-                  events={events}
+                  events={filteredEvents}
                   onTimeSlotClick={handleTimeSlotClick}
                   onEventClick={handleEditEvent}
                 />
@@ -192,7 +201,7 @@ function App() {
               {view === 'day' && (
                 <DayView
                   currentDate={currentDate}
-                  events={events}
+                  events={filteredEvents}
                   onTimeSlotClick={handleDayTimeSlotClick}
                   onEventClick={handleEditEvent}
                 />
@@ -210,7 +219,42 @@ function App() {
         event={selectedEvent}
         initialDate={selectedDate}
       />
-
+      <Toaster 
+        position="top-center"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#fff',
+            color: '#363636',
+            boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.06)',
+            borderRadius: '12px',
+            padding: '14px 20px',
+            fontSize: '14px',
+            fontWeight: '500',
+            maxWidth: '500px',
+          },
+          success: {
+            duration: 3000,
+            iconTheme: {
+              primary: '#10b981',
+              secondary: '#fff',
+            },
+            style: {
+              border: '1px solid #d1fae5',
+            },
+          },
+          error: {
+            duration: 4000,
+            iconTheme: {
+              primary: '#ef4444',
+              secondary: '#fff',
+            },
+            style: {
+              border: '1px solid #fee2e2',
+            },
+          },
+        }}
+      />
     </div>
   );
 }

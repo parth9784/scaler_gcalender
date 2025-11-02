@@ -15,7 +15,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   onDateSelect,
   onCreateClick,
 }) => {
-  const { isSidebarOpen, toggleSidebar } = useAppStore();
+  const { isSidebarOpen, toggleSidebar, eventTypeFilters, toggleEventTypeFilter } = useAppStore();
   const [miniCalendarDate, setMiniCalendarDate] = React.useState(new Date());
   const days = getMonthDays(miniCalendarDate);
   const weekDays = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
@@ -158,16 +158,31 @@ const Sidebar: React.FC<SidebarProps> = ({
               <h3 className="text-xs font-semibold text-gray-900 mb-2">My calendars</h3>
               <div className="space-y-1">
                 <label className="flex items-center space-x-3 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
-                  <input type="checkbox" className="w-4 h-4 text-blue-600 rounded" defaultChecked />
+                  <input 
+                    type="checkbox" 
+                    className="w-4 h-4 text-blue-600 rounded cursor-pointer" 
+                    checked={eventTypeFilters.event}
+                    onChange={() => toggleEventTypeFilter('event')}
+                  />
                   <span className="text-sm text-gray-700">Events</span>
                 </label>
                 <label className="flex items-center space-x-3 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
-                  <input type="checkbox" className="w-4 h-4 text-green-600 rounded" defaultChecked />
-                  <span className="text-sm text-gray-700">Reminders</span>
+                  <input 
+                    type="checkbox" 
+                    className="w-4 h-4 text-purple-600 rounded cursor-pointer" 
+                    checked={eventTypeFilters.task}
+                    onChange={() => toggleEventTypeFilter('task')}
+                  />
+                  <span className="text-sm text-gray-700">Tasks</span>
                 </label>
                 <label className="flex items-center space-x-3 px-2 py-1.5 hover:bg-gray-50 rounded cursor-pointer">
-                  <input type="checkbox" className="w-4 h-4 text-purple-600 rounded" defaultChecked />
-                  <span className="text-sm text-gray-700">Tasks</span>
+                  <input 
+                    type="checkbox" 
+                    className="w-4 h-4 text-green-600 rounded cursor-pointer" 
+                    checked={eventTypeFilters.reminder}
+                    onChange={() => toggleEventTypeFilter('reminder')}
+                  />
+                  <span className="text-sm text-gray-700">Reminders</span>
                 </label>
               </div>
             </div>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { Loader, CalendarFold, Mail, Lock } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 interface LoginProps {
   onSuccess?: () => void;

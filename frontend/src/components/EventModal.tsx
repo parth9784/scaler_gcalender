@@ -44,6 +44,7 @@ const EventModal: React.FC<EventModalProps> = ({
       setEndTime(format(end, 'HH:mm'));
       setAllDay(event.all_day);
       setColor(event.color);
+      setEventType(event.event_type);
     } else if (initialDate) {
       const dateStr = format(initialDate, 'yyyy-MM-dd');
       setStartDate(dateStr);
@@ -51,6 +52,7 @@ const EventModal: React.FC<EventModalProps> = ({
       setStartTime('09:00');
       setEndTime('10:00');
       setColor('#4285F4');
+      setEventType('event');
     }
   }, [event, initialDate]);
 
@@ -64,6 +66,15 @@ const EventModal: React.FC<EventModalProps> = ({
       ? `${endDate}T23:59:59`
       : `${endDate}T${endTime}:00`;
 
+    // Validate end date/time is not before start date/time
+    const startDateObj = new Date(startDateTime);
+    const endDateObj = new Date(endDateTime);
+
+    if (endDateObj < startDateObj) {
+      alert('End date/time cannot be before start date/time');
+      return;
+    }
+
     const eventData: CreateEventData | UpdateEventData = {
       title,
       description: description || undefined,
@@ -71,6 +82,7 @@ const EventModal: React.FC<EventModalProps> = ({
       end_time: endDateTime,
       all_day: allDay,
       color,
+      event_type: eventType,
     };
 
     onSave(eventData);
@@ -86,6 +98,7 @@ const EventModal: React.FC<EventModalProps> = ({
     setEndTime('');
     setAllDay(false);
     setColor('#4285F4');
+    setEventType('event');
     setShowColorPicker(false);
     onClose();
   };
@@ -213,6 +226,7 @@ const EventModal: React.FC<EventModalProps> = ({
                     type="date"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
+                    min={startDate}
                     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all"
                     required
                     aria-label="End date"
